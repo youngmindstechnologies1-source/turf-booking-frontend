@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatPrice, formatDate, getSportIcon } from '../../utils/helpers';
 import { AMENITIES } from '../../utils/constants';
 import SlotPicker from '../../components/player/SlotPicker';
+import PaymentModeModal from '../../components/player/PaymentModeModal';
 import StarRating from '../../components/common/StarRating';
 import Loader from '../../components/common/Loader';
 import toast from 'react-hot-toast';
@@ -33,8 +34,7 @@ const TurfDetail = () => {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedSport, setSelectedSport] = useState('');
   const [booking, setBooking] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [bookingRef, setBookingRef] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const fetchTurf = useCallback(async () => {
     try {
@@ -75,7 +75,7 @@ const TurfDetail = () => {
     setSelectedSlots(slots);
   };
 
-  const handleBooking = async () => {
+  const handleBookNowClick = () => {
     if (!isAuthenticated) {
       toast.error('Please login to book');
       navigate('/login');
@@ -92,19 +92,25 @@ const TurfDetail = () => {
       return;
     }
 
+    setShowPaymentModal(true);
+  };
+
+  const handleBookingConfirm = async ({ paymentMode, playerCount }) => {
     setBooking(true);
     try {
       const res = await createBooking({
-        turf: turf._id,
-        slots: selectedSlots.map((s) => s._id),
+        turfId: turf._id,
+        slotIds: selectedSlots.map((s) => s._id),
         sport: selectedSport,
-        date: selectedSlots[0]?.date,
+        paymentMode,
+        playerCount,
       });
       const data = res.data.booking || res.data.data || res.data;
-      setBookingRef(data.bookingRef || data._id);
-      setShowConfirmation(true);
+      setShowPaymentModal(false);
       setSelectedSlots([]);
-      toast.success('Booking confirmed!');
+      toast.success(paymentMode === 'upi_split' ? 'Split created!' : 'Booking confirmed!');
+      // Navigate to the confirmation page
+      navigate(`/booking/${data._id}/confirmation`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Booking failed. Slots may have been taken.');
     } finally {
@@ -393,14 +399,14 @@ const TurfDetail = () => {
                 <button
                   className={`btn btn-primary btn-lg ${selectedSlots.length > 0 ? 'btn-book-pulse' : ''}`}
                   style={{ width: '100%' }}
-                  onClick={handleBooking}
+                  onClick={handleBookNowClick}
                   disabled={booking || selectedSlots.length === 0}
                 >
                   {booking ? 'Booking...' : selectedSlots.length === 0 ? 'Select Slots to Book' : `Book Now — ${formatPrice(totalPrice)}`}
                 </button>
 
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '12px' }}>
-                  💳 Pay at venue • Free cancellation
+                  💳 Pay at venue or split via UPI • Free cancellation
                 </p>
               </div>
             </motion.div>
@@ -408,45 +414,15 @@ const TurfDetail = () => {
         </div>
       </div>
 
-      {/* Booking Confirmation Modal */}
-      {showConfirmation && (
-        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
-          <motion.div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            style={{ textAlign: 'center' }}
-          >
-            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>
-              <HiOutlineCheckCircle size={72} color="var(--color-primary)" />
-            </div>
-            <h2 style={{ marginBottom: '8px' }}>Booking Confirmed!</h2>
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
-              Your booking at <strong>{turf.name}</strong> has been confirmed.
-            </p>
-            <div style={{
-              background: 'var(--color-bg-tertiary)',
-              borderRadius: 'var(--radius-md)',
-              padding: '16px',
-              marginBottom: '24px',
-            }}>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginBottom: '4px' }}>Booking Reference</p>
-              <p className="gradient-text" style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '2px' }}>
-                {bookingRef}
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button className="btn btn-secondary" onClick={() => setShowConfirmation(false)}>
-                Continue Browsing
-              </button>
-              <button className="btn btn-primary" onClick={() => navigate('/my-bookings')}>
-                View My Bookings
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      {/* Payment Mode Modal */}
+      <PaymentModeModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={totalPrice}
+        turf={turf}
+        onConfirm={handleBookingConfirm}
+        isSubmitting={booking}
+      />
     </div>
   );
 };

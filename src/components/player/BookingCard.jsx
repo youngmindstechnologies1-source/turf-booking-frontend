@@ -1,19 +1,30 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cancelBooking } from '../../services/api';
-import { formatPrice, formatDate, formatTime, getStatusColor, getSportIcon } from '../../utils/helpers';
+import { formatPrice, formatDate, formatTime, getStatusColor, getSportIcon, generateWhatsAppShareText } from '../../utils/helpers';
 import ReviewForm from './ReviewForm';
+import HostMatchModal from './HostMatchModal';
 import toast from 'react-hot-toast';
-import { HiOutlineCalendar, HiOutlineClock, HiOutlineLocationMarker, HiOutlineX } from 'react-icons/hi';
+import {
+  HiOutlineCalendar,
+  HiOutlineClock,
+  HiOutlineLocationMarker,
+  HiOutlineX,
+  HiOutlineShare,
+  HiOutlineEye,
+} from 'react-icons/hi';
 
 const BookingCard = ({ booking, onUpdate }) => {
+  const navigate = useNavigate();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [hostModalOpen, setHostModalOpen] = useState(false);
 
   const turf = booking.turf || {};
-  const isUpcoming = booking.status === 'confirmed' && new Date(booking.date) >= new Date(new Date().toDateString());
+  const isUpcoming = ['confirmed', 'pending_split'].includes(booking.status) && new Date(booking.date) >= new Date(new Date().toDateString());
   const canReview = booking.status === 'completed' && !booking.hasReviewed;
+  const isSplit = booking.playerCount > 1;
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -29,9 +40,46 @@ const BookingCard = ({ booking, onUpdate }) => {
     }
   };
 
+  const handleShare = () => {
+    const splitUrl = `${window.location.origin}/pay/split/${booking.bookingRef}`;
+    const shareText = generateWhatsAppShareText(
+      {
+        turfName: turf.name,
+        date: booking.date,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalAmount: booking.totalAmount,
+        splitAmount: booking.splitAmount,
+        playerCount: booking.playerCount,
+        paymentMode: booking.paymentMode,
+        bookingRef: booking.bookingRef,
+      },
+      splitUrl
+    );
+
+    if (navigator.share) {
+      navigator.share({ title: `Turf Booking — ${booking.bookingRef}`, text: shareText }).catch(() => {});
+    } else {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank');
+    }
+  };
+
   const imageUrl = turf.photos && turf.photos.length > 0
     ? (turf.photos[0].startsWith('http') ? turf.photos[0] : `/uploads/${turf.photos[0]}`)
     : null;
+
+  // Calculate split progress for display
+  const getSplitProgress = () => {
+    if (!isSplit) return null;
+    const online = booking.onlineCollected || 0;
+    const cash = booking.cashOutstanding || 0;
+    const acted = online + cash;
+    const paidCount = booking.splitAmount > 0 ? Math.round(acted / booking.splitAmount) : 0;
+    return { paidCount, total: booking.playerCount };
+  };
+
+  const splitProgress = getSplitProgress();
 
   return (
     <>
@@ -80,9 +128,17 @@ const BookingCard = ({ booking, onUpdate }) => {
                   <span style={{ textTransform: 'capitalize' }}>{turf.city || ''}</span>
                 </div>
               </div>
-              <span className={`badge ${getStatusColor(booking.status)}`}>
-                {booking.status}
-              </span>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <span className={`badge ${getStatusColor(booking.status)}`}>
+                  {booking.status === 'pending_split' ? 'Pending Split' : booking.status === 'fully_settled' ? 'Settled' : booking.status}
+                </span>
+                {booking.paymentMode && (
+                  <span className={`badge ${booking.paymentMode === 'upi_split' ? 'badge-info' : 'badge-secondary'}`}
+                    style={{ fontSize: '0.7rem' }}>
+                    {booking.paymentMode === 'upi_split' ? '📱 UPI Split' : '💵 Cash'}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '20px', marginTop: '12px', flexWrap: 'wrap' }}>
@@ -109,6 +165,34 @@ const BookingCard = ({ booking, onUpdate }) => {
               )}
             </div>
 
+            {/* Split Progress Bar */}
+            {isSplit && splitProgress && (
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                    {booking.playerCount} players • {formatPrice(booking.splitAmount)}/person
+                  </span>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                    {splitProgress.paidCount}/{splitProgress.total} paid
+                  </span>
+                </div>
+                <div style={{
+                  height: '4px',
+                  background: 'var(--color-bg-tertiary)',
+                  borderRadius: '2px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${(splitProgress.paidCount / splitProgress.total) * 100}%`,
+                    background: 'var(--gradient-primary)',
+                    borderRadius: '2px',
+                    transition: 'width 0.3s ease',
+                  }} />
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span style={{
@@ -125,7 +209,47 @@ const BookingCard = ({ booking, onUpdate }) => {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Matchmaking buttons */}
+                {isUpcoming && (
+                  booking.isHosted ? (
+                    <Link
+                      to={`/matches/${booking.matchId}`}
+                      className="btn btn-ghost btn-sm"
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                    >
+                      ⚽ Match Page
+                    </Link>
+                  ) : (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setHostModalOpen(true)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      🤝 Host Match
+                    </button>
+                  )
+                )}
+                {/* View Split Status */}
+                {isSplit && isUpcoming && (
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => navigate(`/booking/${booking._id}/confirmation`)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <HiOutlineEye size={14} /> Split
+                  </button>
+                )}
+                {/* Share Button */}
+                {isUpcoming && (
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleShare}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <HiOutlineShare size={14} /> Share
+                  </button>
+                )}
                 {isUpcoming && (
                   <button
                     className="btn btn-danger btn-sm"
@@ -199,6 +323,15 @@ const BookingCard = ({ booking, onUpdate }) => {
             setShowReviewModal(false);
             if (onUpdate) onUpdate();
           }}
+        />
+      )}
+
+      {hostModalOpen && (
+        <HostMatchModal
+          isOpen={hostModalOpen}
+          onClose={() => setHostModalOpen(false)}
+          booking={booking}
+          onHostSuccess={onUpdate}
         />
       )}
     </>

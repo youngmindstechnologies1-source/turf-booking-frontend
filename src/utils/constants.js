@@ -33,6 +33,7 @@ export const SURFACE_TYPES = [
 ];
 
 export const CITIES = [
+  'Chhatrapati Sambhajinagar',
   'mumbai',
   'delhi',
   'bangalore',

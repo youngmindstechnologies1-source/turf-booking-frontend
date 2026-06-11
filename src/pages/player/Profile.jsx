@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { changePassword } from '../../services/api';
+import { changePassword, getUserProfile } from '../../services/api';
 import { motion } from 'framer-motion';
-import { HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineShieldCheck } from 'react-icons/hi';
+import { HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineShieldCheck, HiOutlineUserGroup } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
@@ -10,7 +10,27 @@ const Profile = () => {
 
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
+  const [skillLevel, setSkillLevel] = useState(user?.skillLevel || 'beginner');
   const [saving, setSaving] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user?._id && !user?.id) return;
+      try {
+        const res = await getUserProfile(user._id || user.id);
+        setFollowersCount(res.data.profile?.followersCount || 0);
+        setFollowingCount(res.data.profile?.followingCount || 0);
+        if (res.data.profile?.skillLevel) {
+          setSkillLevel(res.data.profile.skillLevel);
+        }
+      } catch (err) {
+        console.error('Failed to load profile details:', err);
+      }
+    };
+    fetchProfileData();
+  }, [user]);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -26,7 +46,7 @@ const Profile = () => {
 
     setSaving(true);
     try {
-      await updateProfile({ name: name.trim(), phone: phone.trim() });
+      await updateProfile({ name: name.trim(), phone: phone.trim(), skillLevel });
       toast.success('Profile updated successfully');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update profile');
@@ -96,9 +116,26 @@ const Profile = () => {
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}>
             {user?.email}
           </p>
-          <span className="badge badge-primary" style={{ textTransform: 'capitalize' }}>
-            <HiOutlineShieldCheck size={12} /> {user?.role}
-          </span>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+            <span className="badge badge-primary" style={{ textTransform: 'capitalize' }}>
+              <HiOutlineShieldCheck size={12} /> {user?.role}
+            </span>
+            <span className="badge badge-info" style={{ textTransform: 'capitalize' }}>
+              Skill: {skillLevel}
+            </span>
+          </div>
+
+          {/* Followers / Following Counts */}
+          <div className="profile-stats" style={{ margin: '0 auto', maxWidth: '300px' }}>
+            <div className="profile-stat-item">
+              <div className="profile-stat-value">{followingCount}</div>
+              <div className="profile-stat-label">Following</div>
+            </div>
+            <div className="profile-stat-item">
+              <div className="profile-stat-value">{followersCount}</div>
+              <div className="profile-stat-label">Followers</div>
+            </div>
+          </div>
         </div>
 
         {/* Edit Profile Form */}
@@ -137,6 +174,14 @@ const Profile = () => {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Your phone number"
               />
+            </div>
+            <div className="input-group">
+              <label>Skill Level</label>
+              <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)}>
+                <option value="beginner">Beginner (Casual play)</option>
+                <option value="intermediate">Intermediate (Competitive play)</option>
+                <option value="advanced">Advanced (High-performance play)</option>
+              </select>
             </div>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? 'Saving...' : 'Save Changes'}

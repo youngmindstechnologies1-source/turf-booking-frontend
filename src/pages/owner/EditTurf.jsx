@@ -84,7 +84,7 @@ const EditTurf = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.city || form.sports.length === 0) {
+    if (!form.name.trim() || !form.description.trim() || !form.address.trim() || !form.city || form.sports.length === 0) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -135,11 +135,11 @@ const EditTurf = () => {
               <input type="text" value={form.name} onChange={(e) => updateForm_('name', e.target.value)} />
             </div>
             <div className="input-group">
-              <label>Description</label>
+              <label>Description *</label>
               <textarea value={form.description} onChange={(e) => updateForm_('description', e.target.value)} rows={4} style={{ resize: 'vertical' }} />
             </div>
             <div className="input-group">
-              <label>Address</label>
+              <label>Address *</label>
               <input type="text" value={form.address} onChange={(e) => updateForm_('address', e.target.value)} />
             </div>
             <div className="input-group">

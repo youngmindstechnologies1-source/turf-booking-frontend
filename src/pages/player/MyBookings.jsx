@@ -31,10 +31,10 @@ const MyBookings = () => {
   const today = new Date(now.toDateString());
 
   const upcoming = bookings.filter(
-    (b) => b.status === 'confirmed' && new Date(b.date) >= today
+    (b) => ['confirmed', 'pending_split'].includes(b.status) && new Date(b.date) >= today
   );
   const completed = bookings.filter(
-    (b) => b.status === 'completed' || (b.status === 'confirmed' && new Date(b.date) < today)
+    (b) => ['completed', 'fully_settled'].includes(b.status) || (['confirmed'].includes(b.status) && new Date(b.date) < today)
   );
   const cancelled = bookings.filter((b) => b.status === 'cancelled');
 

@@ -11,8 +11,12 @@ const TurfDetail = React.lazy(() => import('./pages/player/TurfDetail'));
 const Login = React.lazy(() => import('./pages/auth/Login'));
 const Register = React.lazy(() => import('./pages/auth/Register'));
 const MyBookings = React.lazy(() => import('./pages/player/MyBookings'));
+const BookingConfirmation = React.lazy(() => import('./pages/player/BookingConfirmation'));
 const Favourites = React.lazy(() => import('./pages/player/Favourites'));
 const Profile = React.lazy(() => import('./pages/player/Profile'));
+const OpenMatches = React.lazy(() => import('./pages/player/OpenMatches'));
+const MatchDetail = React.lazy(() => import('./pages/player/MatchDetail'));
+const PlayerProfile = React.lazy(() => import('./pages/player/PlayerProfile'));
 
 const OwnerDashboard = React.lazy(() => import('./pages/owner/Dashboard'));
 const MyTurfs = React.lazy(() => import('./pages/owner/MyTurfs'));
@@ -20,6 +24,7 @@ const CreateTurf = React.lazy(() => import('./pages/owner/CreateTurf'));
 const EditTurf = React.lazy(() => import('./pages/owner/EditTurf'));
 const SlotManager = React.lazy(() => import('./pages/owner/SlotManager'));
 const BookingCalendar = React.lazy(() => import('./pages/owner/BookingCalendar'));
+const CheckInDashboard = React.lazy(() => import('./pages/owner/CheckInDashboard'));
 const Analytics = React.lazy(() => import('./pages/owner/Analytics'));
 
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -27,10 +32,16 @@ const PendingTurfs = React.lazy(() => import('./pages/admin/PendingTurfs'));
 const ManageUsers = React.lazy(() => import('./pages/admin/ManageUsers'));
 const AllBookings = React.lazy(() => import('./pages/admin/AllBookings'));
 
+// Public pages (no auth required)
+const SplitPayment = React.lazy(() => import('./pages/public/SplitPayment'));
+
 function App() {
   return (
     <Suspense fallback={<Loader text="Loading TurfBook..." />}>
       <Routes>
+        {/* Public Routes — No Layout/Auth */}
+        <Route path="/pay/split/:bookingRef" element={<SplitPayment />} />
+
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -44,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute roles={['player']}>
                 <MyBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking/:id/confirmation"
+            element={
+              <ProtectedRoute roles={['player']}>
+                <BookingConfirmation />
               </ProtectedRoute>
             }
           />
@@ -63,6 +82,30 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/matches"
+            element={
+              <ProtectedRoute roles={['player']}>
+                <OpenMatches />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/matches/:id"
+            element={
+              <ProtectedRoute roles={['player']}>
+                <MatchDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:id"
+            element={
+              <ProtectedRoute roles={['player']}>
+                <PlayerProfile />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Owner Routes */}
@@ -79,6 +122,7 @@ function App() {
           <Route path="/owner/turfs/:id/edit" element={<EditTurf />} />
           <Route path="/owner/turfs/:id/slots" element={<SlotManager />} />
           <Route path="/owner/bookings/:turfId" element={<BookingCalendar />} />
+          <Route path="/owner/check-in/:turfId" element={<CheckInDashboard />} />
           <Route path="/owner/analytics" element={<Analytics />} />
         </Route>
 

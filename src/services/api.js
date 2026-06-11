@@ -64,6 +64,14 @@ export const getMyBookings = () => api.get('/bookings/my-bookings');
 export const getTurfBookings = (turfId, params) => api.get(`/bookings/turf/${turfId}`, { params });
 export const getBooking = (id) => api.get(`/bookings/${id}`);
 export const cancelBooking = (id) => api.put(`/bookings/${id}/cancel`);
+export const settleBooking = (id) => api.put(`/bookings/${id}/settle`);
+export const getSplitDetails = (id) => api.get(`/bookings/${id}/split-details`);
+
+// Split (Public — no auth)
+export const getSplitStatus = (bookingRef) => api.get(`/split/${bookingRef}`);
+export const submitUtr = (bookingRef, data) => api.post(`/split/${bookingRef}/submit-utr`, data);
+export const markPayCash = (bookingRef, data) => api.post(`/split/${bookingRef}/pay-cash`, data);
+export const hostConfirmPayment = (bookingRef, data) => api.post(`/split/${bookingRef}/host-confirm`, data);
 
 // Reviews
 export const createReview = (data) => api.post('/reviews', data);
@@ -79,5 +87,22 @@ export const toggleUserActive = (id) => api.put(`/admin/users/${id}/toggle-activ
 export const getAllBookings = (params) => api.get('/admin/bookings', { params });
 export const adminCancelBooking = (id) => api.put(`/admin/bookings/${id}/cancel`);
 export const getStats = () => api.get('/admin/stats');
+
+// Users / Profiles / Follow System
+export const getUserProfile = (id) => api.get(`/users/profile/${id}`);
+export const toggleFollow = (id) => api.post(`/users/follow/${id}`);
+export const searchPlayers = (query) => api.get('/users/search', { params: { query } });
+
+// Matches / Matchmaking
+export const hostMatch = (data) => api.post('/matches/host', data);
+export const getOpenMatches = (params) => api.get('/matches', { params });
+export const getMatchDetails = (id) => api.get(`/matches/${id}`);
+export const joinMatch = (id) => api.post(`/matches/${id}/join`);
+export const leaveMatch = (id) => api.post(`/matches/${id}/leave`);
+
+// Notifications
+export const getNotifications = () => api.get('/notifications');
+export const markNotificationRead = (id) => api.put(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => api.put('/notifications/read-all');
 
 export default api;

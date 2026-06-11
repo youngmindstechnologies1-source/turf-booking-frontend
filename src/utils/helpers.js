@@ -38,8 +38,10 @@ export const getStatusColor = (status) => {
     case 'cancelled':
       return 'badge-danger';
     case 'pending':
+    case 'pending_split':
       return 'badge-warning';
     case 'approved':
+    case 'fully_settled':
       return 'badge-success';
     case 'rejected':
       return 'badge-danger';
@@ -73,3 +75,82 @@ export const generateDateRange = (start, end) => {
     return [];
   }
 };
+
+/**
+ * Generate a UPI Intent URI for direct VPA payment.
+ * @param {string} vpa - Turf owner's UPI VPA
+ * @param {string} name - Display name for the payee
+ * @param {number} amount - Amount in INR
+ * @param {string} bookingRef - Booking reference for transaction note
+ * @returns {string} UPI Intent URI
+ */
+export const generateUpiIntent = (vpa, name, amount, bookingRef) => {
+  const params = new URLSearchParams({
+    pa: vpa,
+    pn: name || 'PitchPe',
+    am: String(amount),
+    cu: 'INR',
+    tn: `Share ${bookingRef}`,
+  });
+  return `upi://pay?${params.toString()}`;
+};
+
+/**
+ * Generate shareable text for WhatsApp with split payment link.
+ */
+export const generateWhatsAppShareText = (booking, splitUrl) => {
+  const lines = [
+    `🏏 *Turf Booking — ${booking.turfName || 'Turf'}*`,
+    `📅 ${formatDate(booking.date)} • ${formatTime(booking.startTime)} – ${formatTime(booking.endTime)}`,
+    `💰 Total: ₹${booking.totalAmount} • Per person: ₹${booking.splitAmount}`,
+    `👥 ${booking.playerCount} players`,
+    '',
+    booking.paymentMode === 'upi_split'
+      ? `Pay your share here 👇`
+      : `Booking confirmed! Details 👇`,
+    splitUrl,
+    '',
+    `Ref: ${booking.bookingRef}`,
+  ];
+  return lines.join('\n');
+};
+
+/**
+ * Get emoji/icon for a split ledger status.
+ */
+export const getSplitStatusIcon = (status) => {
+  switch (status) {
+    case 'settled': return '✅';
+    case 'verified_by_host': return '✅';
+    case 'utr_submitted': return '🔄';
+    case 'pay_at_turf': return '💵';
+    case 'unpaid': return '⏳';
+    default: return '⏳';
+  }
+};
+
+/**
+ * Get human-readable label for a split ledger status.
+ */
+export const getSplitStatusLabel = (status) => {
+  switch (status) {
+    case 'settled': return 'Settled';
+    case 'verified_by_host': return 'Paid';
+    case 'utr_submitted': return 'UTR Submitted';
+    case 'pay_at_turf': return 'Cash at Venue';
+    case 'unpaid': return 'Unpaid';
+    default: return 'Unpaid';
+  }
+};
+
+/**
+ * Format milliseconds into mm:ss countdown string.
+ */
+export const formatCountdown = (ms) => {
+  if (ms <= 0) return '0:00';
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+

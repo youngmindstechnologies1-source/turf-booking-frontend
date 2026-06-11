@@ -49,7 +49,7 @@ const CreateTurf = () => {
   const canProceed = () => {
     switch (step) {
       case 0:
-        return form.name.trim() && form.city;
+        return form.name.trim() && form.description.trim() && form.address.trim() && form.city;
       case 1:
         return form.sports.length > 0 && form.surfaceType;
       case 2:
@@ -64,7 +64,7 @@ const CreateTurf = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.city || form.sports.length === 0) {
+    if (!form.name.trim() || !form.description.trim() || !form.address.trim() || !form.city || form.sports.length === 0) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -151,7 +151,7 @@ const CreateTurf = () => {
               />
             </div>
             <div className="input-group">
-              <label>Description</label>
+              <label>Description *</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateForm('description', e.target.value)}
@@ -161,7 +161,7 @@ const CreateTurf = () => {
               />
             </div>
             <div className="input-group">
-              <label>Address</label>
+              <label>Address *</label>
               <input
                 type="text"
                 value={form.address}
