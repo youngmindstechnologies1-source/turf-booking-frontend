@@ -80,7 +80,7 @@ const Register = () => {
         password: formData.password,
         role: formData.role
       });
-      toast.success(`Welcome to TurfBook, ${user.name}!`);
+      toast.success(`Welcome to PitchPe, ${user.name}!`);
 
       if (user.role === 'owner') {
         navigate('/owner');
@@ -115,7 +115,7 @@ const Register = () => {
             marginBottom: '24px',
             fontFamily: "'Outfit', sans-serif"
           }}>
-            TurfBook
+            PitchPe
           </Link>
 
           <h1>Create Account</h1>
@@ -360,7 +360,7 @@ const Register = () => {
           <div className="auth-testimonial">
             <p className="auth-testimonial-quote">
               {formData.role === 'owner'
-                ? '"Since listing on TurfBook, our bookings have increased by 40%. The dashboard makes management a breeze!"'
+                ? '"Since listing on PitchPe, our bookings have increased by 40%. The dashboard makes management a breeze!"'
                 : '"We found the perfect turf for our weekly matches. The booking process is seamless and the reviews are spot on!"'}
             </p>
             <div className="auth-testimonial-author">

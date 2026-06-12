@@ -82,7 +82,7 @@ const Navbar = () => {
       <div className="navbar-inner container">
         <Link to="/" className="navbar-brand">
           <Logo className="navbar-brand-icon" size={28} />
-          TurfBook
+          PitchPe
         </Link>
 
         {/* Desktop Nav */}

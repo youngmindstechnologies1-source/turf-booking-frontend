@@ -76,7 +76,7 @@ const Login = () => {
             marginBottom: '24px',
             fontFamily: "'Outfit', sans-serif"
           }}>
-            TurfBook
+            PitchPe
           </Link>
 
           <h1>Welcome Back</h1>
@@ -194,7 +194,7 @@ const Login = () => {
           {/* Testimonial Card */}
           <div className="auth-testimonial">
             <p className="auth-testimonial-quote">
-              "TurfBook made finding and booking a turf so easy! We play every weekend now and never have to worry about availability."
+              "PitchPe made finding a turf and splitting payments so easy! We play every weekend now and never have to worry about cash or collections."
             </p>
             <div className="auth-testimonial-author">
               <div className="auth-testimonial-avatar">R</div>

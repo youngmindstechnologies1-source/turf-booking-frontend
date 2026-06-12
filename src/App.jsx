@@ -37,7 +37,7 @@ const SplitPayment = React.lazy(() => import('./pages/public/SplitPayment'));
 
 function App() {
   return (
-    <Suspense fallback={<Loader text="Loading TurfBook..." />}>
+    <Suspense fallback={<Loader text="Loading PitchPe..." />}>
       <Routes>
         {/* Public Routes — No Layout/Auth */}
         <Route path="/pay/split/:bookingRef" element={<SplitPayment />} />

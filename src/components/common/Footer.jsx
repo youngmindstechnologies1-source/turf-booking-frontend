@@ -50,10 +50,10 @@ const Footer = () => {
           <div className="footer-col">
             <h3 className="footer-brand-title">
               <Logo size={24} style={{ marginRight: '8px' }} />
-              TurfBook
+              PitchPe
             </h3>
             <p className="footer-brand-description">
-              India's premier platform for discovering and booking sports turfs. Play your game, your way.
+              India's premier platform for discovering sports turfs and splitting booking payments. Play your game, your way.
             </p>
             <div className="footer-social-links">
               <a href="#" className="footer-social footer-social-icon twitter" aria-label="Twitter">
@@ -91,8 +91,8 @@ const Footer = () => {
 
           <div className="footer-col">
             <h3>Contact Us</h3>
-            <a href="mailto:support@turfbook.in" className="footer-contact-item">
-              <HiOutlineMail size={16} /> support@turfbook.in
+            <a href="mailto:support@pitchpe.in" className="footer-contact-item">
+              <HiOutlineMail size={16} /> support@pitchpe.in
             </a>
             <a href="tel:+911234567890" className="footer-contact-item">
               <HiOutlinePhone size={16} /> +91 12345 67890
@@ -107,7 +107,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>© 2026 TurfBook. All rights reserved. Made with ❤️ for sports lovers.</p>
+          <p>© 2026 PitchPe. All rights reserved. Made with ❤️ for sports lovers.</p>
         </div>
       </div>
     </footer>

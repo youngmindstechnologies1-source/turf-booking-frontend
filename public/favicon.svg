@@ -1,14 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="pitch-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0D9488;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pay-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#34D399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#60A5FA;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <circle cx="50" cy="50" r="48" fill="url(#grad)" />
-  <circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="2.5" opacity="0.9"/>
-  <line x1="50" y1="20" x2="50" y2="80" stroke="white" stroke-width="2" opacity="0.7"/>
-  <line x1="20" y1="50" x2="80" y2="50" stroke="white" stroke-width="2" opacity="0.7"/>
-  <circle cx="50" cy="50" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.8"/>
-  <circle cx="50" cy="50" r="2" fill="white" opacity="0.9"/>
+  
+  <!-- Circular background -->
+  <circle cx="50" cy="50" r="48" fill="#0F172A" stroke="url(#pay-grad)" stroke-width="2" />
+  
+  <!-- Subtle outer stadium ring inside -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="url(#pay-grad)" stroke-width="1.5" opacity="0.15" />
+
+  <!-- P / Rupee hybrid symbol -->
+  <!-- Top bar -->
+  <path d="M 26 24 L 74 24" stroke="url(#pay-grad)" stroke-width="8" stroke-linecap="round" />
+  <!-- Middle bar -->
+  <path d="M 26 42 L 64 42" stroke="url(#pay-grad)" stroke-width="8" stroke-linecap="round" />
+  <!-- Vertical Stem -->
+  <path d="M 44 24 L 44 80" stroke="url(#pay-grad)" stroke-width="8" stroke-linecap="round" />
+  
+  <!-- Main Pitch Loop (P shape) -->
+  <path d="M 44 24 H 64 A 18 18 0 0 1 64 60 H 44" fill="none" stroke="url(#pitch-grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Pitch center line inside loop -->
+  <path d="M 63 24 L 63 60" stroke="url(#accent-grad)" stroke-width="3" stroke-dasharray="4 3" opacity="0.8" />
+  
+  <!-- Center circle of pitch -->
+  <circle cx="63" cy="42" r="9" fill="none" stroke="url(#accent-grad)" stroke-width="3.5" opacity="0.8" />
+  
+  <!-- Penalty spot/ball -->
+  <circle cx="63" cy="42" r="4" fill="#34D399" />
+  
+  <!-- Speed lightning swoosh over stem -->
+  <path d="M 35 76 L 49 58 L 40 58 L 47 44" fill="none" stroke="#60A5FA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
 </svg>

@@ -175,15 +175,16 @@ h4 { font-size: var(--font-size-xl); }
 }
 
 .navbar-brand-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--gradient-primary);
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: var(--transition);
+}
+
+.navbar-brand-icon:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
 .navbar-links {
