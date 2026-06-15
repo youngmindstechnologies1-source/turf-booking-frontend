@@ -37,6 +37,8 @@ const SlotPicker = ({ turfId, sport, onSlotsSelected }) => {
   useEffect(() => {
     fetchSlots();
     setSelectedSlots([]);
+    // Notify parent that selection is cleared when date changes
+    if (onSlotsSelected) onSlotsSelected([]);
   }, [fetchSlots]);
 
   const handleSlotClick = (slot) => {

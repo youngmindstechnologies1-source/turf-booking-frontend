@@ -23,8 +23,16 @@ const TurfCard = ({ turf }) => {
     }
   };
 
+  const getPhotoUrl = (photo) => {
+    if (!photo) return null;
+    // S3 URLs are already absolute
+    if (photo.startsWith('http')) return photo;
+    // Local uploads — prepend nothing (proxied via Vite in dev, same-origin in prod)
+    return photo.startsWith('/uploads/') ? photo : `/uploads/${photo}`;
+  };
+
   const imageUrl = turf.photos && turf.photos.length > 0
-    ? (turf.photos[0].startsWith('http') ? turf.photos[0] : `/uploads/${turf.photos[0]}`)
+    ? getPhotoUrl(turf.photos[0])
     : null;
 
   return (

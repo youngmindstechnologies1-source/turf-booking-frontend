@@ -133,9 +133,13 @@ const TurfDetail = () => {
     return found ? found.label : value;
   };
 
-  const photos = turf.photos?.map((p) =>
-    p.startsWith('http') ? p : `/uploads/${p}`
-  ) || [];
+  const getPhotoUrl = (p) => {
+    if (!p) return '';
+    if (p.startsWith('http')) return p;
+    return p.startsWith('/uploads/') ? p : `/uploads/${p}`;
+  };
+
+  const photos = turf.photos?.map(getPhotoUrl) || [];
 
   return (
     <div style={{ paddingBottom: '64px' }}>
