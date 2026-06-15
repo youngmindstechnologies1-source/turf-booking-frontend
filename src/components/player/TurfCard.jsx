@@ -25,10 +25,19 @@ const TurfCard = ({ turf }) => {
 
   const getPhotoUrl = (photo) => {
     if (!photo) return null;
-    // S3 URLs are already absolute
-    if (photo.startsWith('http')) return photo;
-    // Local uploads — prepend nothing (proxied via Vite in dev, same-origin in prod)
-    return photo.startsWith('/uploads/') ? photo : `/uploads/${photo}`;
+    // Already a proxy path (/s3/... or /uploads/...)
+    if (photo.startsWith('/s3/') || photo.startsWith('/uploads/')) return photo;
+    // Old full S3 URL → convert to proxy path
+    if (photo.startsWith('http')) {
+      try {
+        const url = new URL(photo);
+        // pathname is like /turf-photos/file.jpg → proxy at /s3/turf-photos/file.jpg
+        return `/s3${url.pathname}`;
+      } catch {
+        return photo;
+      }
+    }
+    return `/uploads/${photo}`;
   };
 
   const imageUrl = turf.photos && turf.photos.length > 0

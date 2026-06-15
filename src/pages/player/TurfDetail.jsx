@@ -135,8 +135,16 @@ const TurfDetail = () => {
 
   const getPhotoUrl = (p) => {
     if (!p) return '';
-    if (p.startsWith('http')) return p;
-    return p.startsWith('/uploads/') ? p : `/uploads/${p}`;
+    if (p.startsWith('/s3/') || p.startsWith('/uploads/')) return p;
+    if (p.startsWith('http')) {
+      try {
+        const url = new URL(p);
+        return `/s3${url.pathname}`;
+      } catch {
+        return p;
+      }
+    }
+    return `/uploads/${p}`;
   };
 
   const photos = turf.photos?.map(getPhotoUrl) || [];
