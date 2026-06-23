@@ -2850,3 +2850,380 @@ tr:hover td {
   background: transparent;
 }
 
+/* ================================================
+   NEW FEATURES CSS — v2.1
+   ================================================ */
+
+/* ===== 1. LIGHT MODE (data-theme="light") ===== */
+[data-theme="light"] {
+  --color-bg-primary: #F8FAFC;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F1F5F9;
+  --color-bg-glass: rgba(255, 255, 255, 0.85);
+  --color-bg-glass-light: rgba(241, 245, 249, 0.8);
+  --color-bg-hover: rgba(0, 0, 0, 0.04);
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-text-inverse: #F1F5F9;
+
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-active: rgba(16, 185, 129, 0.5);
+
+  --gradient-card: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+  --gradient-hero: linear-gradient(135deg, #e8f5e9 0%, #f0f9ff 50%, #e8f5e9 100%);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .navbar-brand {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .hero-overlay {
+  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.7) 0%, rgba(248, 250, 252, 0.9) 50%, var(--color-bg-primary) 100%);
+}
+
+[data-theme="light"] .sidebar {
+  background: #FFFFFF;
+  border-right-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .navbar-mobile-menu {
+  background: #FFFFFF;
+}
+
+[data-theme="light"] .navbar-profile-btn {
+  background: #F1F5F9;
+  border-color: rgba(0,0,0,0.1);
+  color: #0F172A;
+}
+
+[data-theme="light"] .navbar-dropdown {
+  background: #FFFFFF;
+  border-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .stat-card {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .input-group input,
+[data-theme="light"] .input-group select,
+[data-theme="light"] .input-group textarea {
+  background: #F8FAFC;
+  border-color: rgba(0,0,0,0.1);
+  color: #0F172A;
+}
+
+[data-theme="light"] .turf-card-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 50%);
+}
+
+[data-theme="light"] .filter-chip {
+  background: #FFFFFF;
+  border-color: rgba(0,0,0,0.1);
+  color: #475569;
+}
+
+[data-theme="light"] .filter-chip:hover {
+  background: #F1F5F9;
+}
+
+[data-theme="light"] .filter-chip.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-primary);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+/* ===== 2. DARK MODE TOGGLE BUTTON ===== */
+.navbar-theme-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 7px 9px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  font-size: 0;
+}
+
+.navbar-theme-toggle:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: rotate(15deg);
+}
+
+/* ===== 3. DISTANCE BADGE ON TURF CARDS ===== */
+.turf-card-distance-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  z-index: 3;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: var(--transition);
+}
+
+.turf-card:hover .turf-card-distance-badge {
+  background: var(--gradient-primary);
+  border-color: transparent;
+}
+
+/* ===== 4. NOTIFICATION BELL — Pulse ring animation ===== */
+@keyframes notif-ring {
+  0%  { transform: rotate(0deg); }
+  10% { transform: rotate(12deg); }
+  20% { transform: rotate(-10deg); }
+  30% { transform: rotate(8deg); }
+  40% { transform: rotate(-6deg); }
+  50% { transform: rotate(0deg); }
+  100%{ transform: rotate(0deg); }
+}
+
+.navbar-notif-btn:has(span) svg {
+  animation: notif-ring 3s ease infinite;
+  transform-origin: top center;
+}
+
+/* ===== 5. PHOTO LIGHTBOX ===== */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lightbox-inner {
+  position: relative;
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  display: block;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -48px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.lightbox-close:hover {
+  background: rgba(239, 68, 68, 0.7);
+  border-color: transparent;
+}
+
+.lightbox-counter {
+  position: absolute;
+  top: -48px;
+  left: 0;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.lightbox-nav:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.lightbox-prev { left: -64px; }
+.lightbox-next { right: -64px; }
+
+.lightbox-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+
+.lightbox-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.lightbox-thumb {
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.55;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.lightbox-thumb:hover {
+  opacity: 0.85;
+}
+
+.lightbox-thumb.active {
+  opacity: 1;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+@media (max-width: 768px) {
+  .lightbox-prev { left: 4px; }
+  .lightbox-next { right: 4px; }
+  .lightbox-nav { width: 36px; height: 36px; }
+  .lightbox-img { max-height: 55vh; }
+}
+
+/* ===== 6. WHATSAPP BUTTON ===== */
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 10px rgba(37, 211, 102, 0.25);
+}
+
+.btn-whatsapp:hover:not(:disabled) {
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  transform: translateY(-1px);
+  color: white;
+}
+
+/* ===== 7. PROMO CODE STYLES ===== */
+.promo-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  outline: none;
+  transition: var(--transition-fast);
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.promo-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.promo-input::placeholder {
+  color: var(--color-text-muted);
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.promo-applied-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  font-weight: 500;
+  animation: promoSlideIn 0.3s ease;
+}
+
+@keyframes promoSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.promo-remove-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: var(--transition-fast);
+}
+
+.promo-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-danger);
+}
+
+

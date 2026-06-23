@@ -133,7 +133,25 @@ const SlotPicker = ({ turfId, sport, onSlotsSelected }) => {
                 key={slot._id}
                 className={className}
                 onClick={() => handleSlotClick(slot)}
+                style={{ position: 'relative' }}
               >
+                {slot.isOffer && status === 'available' && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-6px',
+                    background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+                    color: '#FFF',
+                    fontSize: '0.55rem',
+                    fontWeight: 900,
+                    padding: '2px 5px',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    zIndex: 2
+                  }}>
+                    -{slot.offerDiscount}%
+                  </span>
+                )}
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
                   {formatTime(slot.startTime)}
                 </div>
@@ -141,7 +159,16 @@ const SlotPicker = ({ turfId, sport, onSlotsSelected }) => {
                   {formatTime(slot.endTime)}
                 </div>
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, marginTop: '4px' }}>
-                  {formatPrice(slot.price)}
+                  {slot.isOffer ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                      <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.7rem', fontWeight: 500 }}>
+                        {formatPrice(slot.originalPrice)}
+                      </span>
+                      <span style={{ color: selected ? '#FFF' : 'var(--color-primary)' }}>{formatPrice(slot.price)}</span>
+                    </div>
+                  ) : (
+                    formatPrice(slot.price)
+                  )}
                 </div>
               </div>
             );

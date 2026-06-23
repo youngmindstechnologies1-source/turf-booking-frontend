@@ -6,11 +6,34 @@ import { HiHeart, HiOutlineHeart, HiOutlineLocationMarker } from 'react-icons/hi
 import StarRating from '../common/StarRating';
 import { formatPrice, getSportIcon } from '../../utils/helpers';
 
-const TurfCard = ({ turf }) => {
+// Haversine formula: returns distance in km
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const TurfCard = ({ turf, userLocation }) => {
   const { user, isAuthenticated, toggleFavourite } = useAuth();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const isFavourite = isAuthenticated && user?.favouriteTurfs?.includes(turf._id);
+
+  // Calculate distance if both coords available
+  let distanceText = null;
+  if (userLocation && turf.location?.coordinates?.length === 2) {
+    const [turfLon, turfLat] = turf.location.coordinates;
+    const dist = haversineDistance(userLocation.lat, userLocation.lon, turfLat, turfLon);
+    distanceText = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
+  }
 
   const handleFavourite = async (e) => {
     e.preventDefault();
@@ -25,13 +48,10 @@ const TurfCard = ({ turf }) => {
 
   const getPhotoUrl = (photo) => {
     if (!photo) return null;
-    // Already a proxy path (/s3/... or /uploads/...)
     if (photo.startsWith('/s3/') || photo.startsWith('/uploads/')) return photo;
-    // Old full S3 URL → convert to proxy path
     if (photo.startsWith('http')) {
       try {
         const url = new URL(photo);
-        // pathname is like /turf-photos/file.jpg → proxy at /s3/turf-photos/file.jpg
         return `/s3${url.pathname}`;
       } catch {
         return photo;
@@ -52,7 +72,6 @@ const TurfCard = ({ turf }) => {
       <Link to={`/turfs/${turf.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className="turf-card card">
           <div className="turf-card-image-wrapper">
-            {/* Shimmer skeleton while image loads */}
             {!imageLoaded && (
               <div className="skeleton skeleton-image" />
             )}
@@ -95,6 +114,13 @@ const TurfCard = ({ turf }) => {
                   <HiOutlineHeart size={20} color="white" />
                 )}
               </button>
+            )}
+
+            {/* Distance Badge */}
+            {distanceText && (
+              <span className="turf-card-distance-badge">
+                📍 {distanceText} away
+              </span>
             )}
 
             {turf.status === 'pending' && (

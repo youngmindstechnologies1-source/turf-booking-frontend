@@ -8,6 +8,7 @@ import {
   HiOutlineCalendar,
   HiOutlineClock,
 } from 'react-icons/hi';
+import { FaWhatsapp } from 'react-icons/fa';
 import { getBooking, getSplitDetails, hostConfirmPayment } from '../../services/api';
 import {
   formatPrice,
@@ -61,6 +62,25 @@ const BookingConfirmation = () => {
 
   const turf = booking.turf || {};
   const splitUrl = `${window.location.origin}/pay/split/${booking.bookingRef}`;
+
+  const handleWhatsAppShare = () => {
+    const shareText = generateWhatsAppShareText(
+      {
+        turfName: turf.name,
+        date: booking.date,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalAmount: booking.totalAmount,
+        splitAmount: booking.splitAmount,
+        playerCount: booking.playerCount,
+        paymentMode: booking.paymentMode,
+        bookingRef: booking.bookingRef,
+      },
+      splitUrl
+    );
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(waUrl, '_blank');
+  };
 
   const handleShare = async () => {
     const shareText = generateWhatsAppShareText(
@@ -294,9 +314,19 @@ const BookingConfirmation = () => {
           <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>
             📤 Share with Your Group
           </h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {/* WhatsApp dedicated button */}
             <button
-              className="btn btn-primary"
+              id="whatsapp-share-btn"
+              className="btn btn-whatsapp"
+              onClick={handleWhatsAppShare}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <FaWhatsapp size={20} />
+              WhatsApp
+            </button>
+            <button
+              className="btn btn-secondary"
               onClick={handleShare}
               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             >

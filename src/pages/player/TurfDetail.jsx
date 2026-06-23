@@ -1,17 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Navigation, Pagination, Thumbs } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import 'swiper/css/thumbs';
 import {
   HiOutlineLocationMarker,
   HiOutlineClock,
   HiOutlineCurrencyRupee,
   HiOutlineCheckCircle,
   HiOutlinePhotograph,
+  HiOutlineX,
+  HiOutlineChevronLeft,
+  HiOutlineChevronRight,
+  HiOutlineTag,
 } from 'react-icons/hi';
 import { getTurfBySlug, getTurfReviews, createBooking } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -22,6 +27,13 @@ import PaymentModeModal from '../../components/player/PaymentModeModal';
 import StarRating from '../../components/common/StarRating';
 import Loader from '../../components/common/Loader';
 import toast from 'react-hot-toast';
+
+// Sample promo codes (in real-world, validate via backend)
+const PROMO_CODES = {
+  PITCHPE10: { discount: 10, type: 'percent', label: '10% off' },
+  FIRST50: { discount: 50, type: 'flat', label: '₹50 off' },
+  PLAY20: { discount: 20, type: 'percent', label: '20% off' },
+};
 
 const TurfDetail = () => {
   const { slug } = useParams();
@@ -35,6 +47,15 @@ const TurfDetail = () => {
   const [selectedSport, setSelectedSport] = useState('');
   const [booking, setBooking] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState(null);
+  const [promoError, setPromoError] = useState('');
 
   const fetchTurf = useCallback(async () => {
     try {
@@ -71,8 +92,44 @@ const TurfDetail = () => {
     fetchReviews();
   }, [fetchReviews]);
 
+  // Close lightbox on Escape key
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => (i + 1) % photos.length);
+      if (e.key === 'ArrowLeft') setLightboxIndex((i) => (i - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [lightboxOpen]);
+
   const handleSlotsSelected = (slots) => {
     setSelectedSlots(slots);
+    // Reset promo when slots change
+    setPromoApplied(null);
+    setPromoCode('');
+    setPromoError('');
+  };
+
+  const handleApplyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) return;
+    const promo = PROMO_CODES[code];
+    if (!promo) {
+      setPromoError('Invalid promo code');
+      setPromoApplied(null);
+      return;
+    }
+    setPromoApplied({ code, ...promo });
+    setPromoError('');
+    toast.success(`Promo "${code}" applied — ${promo.label}!`);
+  };
+
+  const handleRemovePromo = () => {
+    setPromoApplied(null);
+    setPromoCode('');
+    setPromoError('');
   };
 
   const handleBookNowClick = () => {
@@ -104,12 +161,12 @@ const TurfDetail = () => {
         sport: selectedSport,
         paymentMode,
         playerCount,
+        promoCode: promoApplied?.code,
       });
       const data = res.data.booking || res.data.data || res.data;
       setShowPaymentModal(false);
       setSelectedSlots([]);
       toast.success(paymentMode === 'upi_split' ? 'Split created!' : 'Booking confirmed!');
-      // Navigate to the confirmation page
       navigate(`/booking/${data._id}/confirmation`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Booking failed. Slots may have been taken.');
@@ -121,7 +178,14 @@ const TurfDetail = () => {
   if (loading) return <Loader text="Loading turf details..." />;
   if (!turf) return null;
 
-  const totalPrice = selectedSlots.reduce((sum, s) => sum + (s.price || 0), 0);
+  const baseTotal = selectedSlots.reduce((sum, s) => sum + (s.price || 0), 0);
+  let discount = 0;
+  if (promoApplied) {
+    discount = promoApplied.type === 'percent'
+      ? Math.round((baseTotal * promoApplied.discount) / 100)
+      : Math.min(promoApplied.discount, baseTotal);
+  }
+  const totalPrice = Math.max(0, baseTotal - discount);
 
   const getAmenityIcon = (value) => {
     const found = AMENITIES.find((a) => a.value === value);
@@ -162,17 +226,23 @@ const TurfDetail = () => {
               spaceBetween={0}
               slidesPerView={1}
               style={{ borderRadius: 'var(--radius-xl)' }}
+              onSlideChange={(swiper) => setLightboxIndex(swiper.activeIndex)}
             >
               {photos.map((photo, i) => (
                 <SwiperSlide key={i}>
-                  <img src={photo} alt={`${turf.name} - ${i + 1}`} />
+                  <img
+                    src={photo}
+                    alt={`${turf.name} - ${i + 1}`}
+                    style={{ cursor: 'zoom-in' }}
+                    onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                  />
                 </SwiperSlide>
               ))}
             </Swiper>
             {photos.length > 1 && (
               <div className="image-counter-badge">
                 <HiOutlinePhotograph size={14} />
-                {photos.length} photos
+                {photos.length} photos • click to expand
               </div>
             )}
           </div>
@@ -180,6 +250,78 @@ const TurfDetail = () => {
           <img src='/images/turf-placeholder.png' alt={turf.name} style={{ width: '100%', height: '350px', objectFit: 'cover', borderRadius: 'var(--radius-xl)' }} />
         )}
       </div>
+
+      {/* Fullscreen Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            className="lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              className="lightbox-inner"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close */}
+              <button className="lightbox-close" onClick={() => setLightboxOpen(false)}>
+                <HiOutlineX size={22} />
+              </button>
+
+              {/* Counter */}
+              <div className="lightbox-counter">
+                {lightboxIndex + 1} / {photos.length}
+              </div>
+
+              {/* Image */}
+              <img
+                src={photos[lightboxIndex]}
+                alt={`${turf.name} - ${lightboxIndex + 1}`}
+                className="lightbox-img"
+              />
+
+              {/* Prev / Next */}
+              {photos.length > 1 && (
+                <>
+                  <button
+                    className="lightbox-nav lightbox-prev"
+                    onClick={() => setLightboxIndex((i) => (i - 1 + photos.length) % photos.length)}
+                  >
+                    <HiOutlineChevronLeft size={26} />
+                  </button>
+                  <button
+                    className="lightbox-nav lightbox-next"
+                    onClick={() => setLightboxIndex((i) => (i + 1) % photos.length)}
+                  >
+                    <HiOutlineChevronRight size={26} />
+                  </button>
+                </>
+              )}
+
+              {/* Thumbnail strip */}
+              {photos.length > 1 && (
+                <div className="lightbox-thumbs">
+                  {photos.map((p, i) => (
+                    <img
+                      key={i}
+                      src={p}
+                      alt=""
+                      className={`lightbox-thumb ${i === lightboxIndex ? 'active' : ''}`}
+                      onClick={() => setLightboxIndex(i)}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content */}
       <div className="container" style={{ marginTop: '32px' }}>
@@ -382,6 +524,46 @@ const TurfDetail = () => {
                   />
                 </div>
 
+                {/* Promo Code */}
+                {selectedSlots.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+                      <HiOutlineTag style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                      Promo Code
+                    </label>
+                    {promoApplied ? (
+                      <div className="promo-applied-badge">
+                        <span>🎉 <strong>{promoApplied.code}</strong> — {promoApplied.label}</span>
+                        <button onClick={handleRemovePromo} className="promo-remove-btn">
+                          <HiOutlineX size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          className="promo-input"
+                          placeholder="Enter code (e.g. FIRST50)"
+                          value={promoCode}
+                          onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoError(''); }}
+                          onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                        />
+                        <button
+                          className="btn btn-secondary"
+                          style={{ whiteSpace: 'nowrap', padding: '0 16px' }}
+                          onClick={handleApplyPromo}
+                          disabled={!promoCode.trim()}
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    )}
+                    {promoError && (
+                      <p style={{ color: 'var(--color-danger)', fontSize: '0.78rem', marginTop: '4px' }}>{promoError}</p>
+                    )}
+                  </div>
+                )}
+
                 {/* Booking Summary */}
                 {selectedSlots.length > 0 && (
                   <div style={{
@@ -399,6 +581,18 @@ const TurfDetail = () => {
                       <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>Sport</span>
                       <span style={{ fontSize: '0.85rem', textTransform: 'capitalize' }}>{selectedSport}</span>
                     </div>
+                    {promoApplied && discount > 0 && (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>Subtotal</span>
+                          <span style={{ fontSize: '0.85rem' }}>{formatPrice(baseTotal)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ color: 'var(--color-primary)', fontSize: '0.85rem' }}>🏷️ Discount</span>
+                          <span style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: 600 }}>−{formatPrice(discount)}</span>
+                        </div>
+                      </>
+                    )}
                     <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ fontWeight: 600 }}>Total</span>
                       <span className="gradient-text" style={{ fontWeight: 800, fontSize: '1.2rem' }}>

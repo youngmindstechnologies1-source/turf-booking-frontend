@@ -32,6 +32,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
 
   // Filters from URL params
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -66,6 +67,17 @@ const Home = () => {
   useEffect(() => {
     fetchTurfs();
   }, [fetchTurfs]);
+
+  // Request geolocation on mount
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        () => setUserLocation(null),
+        { timeout: 8000 }
+      );
+    }
+  }, []);
 
   // Sync filters to URL
   useEffect(() => {
@@ -363,7 +375,7 @@ const Home = () => {
                 viewport={{ once: true, margin: '-40px' }}
                 variants={cardVariants}
               >
-                <TurfCard turf={turf} />
+                <TurfCard turf={turf} userLocation={userLocation} />
               </motion.div>
             ))}
           </div>

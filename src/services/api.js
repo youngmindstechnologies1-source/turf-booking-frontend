@@ -57,6 +57,8 @@ export const getSlots = (turfId, date) => api.get(`/slots/${turfId}`, { params: 
 export const updateSlotPrice = (id, price) => api.put(`/slots/${id}/price`, { price });
 export const blockSlots = (data) => api.put('/slots/block', data);
 export const unblockSlots = (data) => api.put('/slots/unblock', data);
+export const launchOffer = (data) => api.post('/slots/launch-offer', data);
+export const revertOffer = (data) => api.post('/slots/revert-offer', data);
 
 // Bookings
 export const createBooking = (data) => api.post('/bookings', data);

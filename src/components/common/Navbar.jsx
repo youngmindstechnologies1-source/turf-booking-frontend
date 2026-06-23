@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlineMenu,
@@ -10,13 +11,16 @@ import {
   HiOutlineHeart,
   HiOutlineTicket,
   HiOutlineChevronDown,
-  HiOutlineBell
+  HiOutlineBell,
+  HiOutlineSun,
+  HiOutlineMoon
 } from 'react-icons/hi';
 import Logo from './Logo';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../../services/api';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -131,6 +135,16 @@ const Navbar = () => {
               Admin Panel
             </NavLink>
           )}
+
+          {/* Theme Toggle - Desktop */}
+          <button
+            id="theme-toggle-desktop"
+            onClick={toggleTheme}
+            className="navbar-theme-toggle"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <HiOutlineSun size={19} /> : <HiOutlineMoon size={19} />}
+          </button>
 
           {isAuthenticated && (
             <>
@@ -247,7 +261,17 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button & Bell */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Theme Toggle - Mobile */}
+          <button
+            id="theme-toggle-mobile"
+            onClick={toggleTheme}
+            className="navbar-theme-toggle"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <HiOutlineSun size={19} /> : <HiOutlineMoon size={19} />}
+          </button>
+
           {isAuthenticated && (
             <div className="navbar-mobile-notifications" style={{ position: 'relative' }}>
               <button
